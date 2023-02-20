@@ -1,5 +1,4 @@
 import boto3
-import requests, json, os, sys
 from flask import Flask, request
 from service import user
 
