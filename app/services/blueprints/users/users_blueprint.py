@@ -1,7 +1,8 @@
-from flask import Flask,Blueprint,request
-from utils import user
 import sys
-sys.path.append('../utils')
+#This import is from the perspective of app.py in the app parent directory
+from services.blueprints.users.utils import user
+
+from flask import Flask,Blueprint,request
 from services.utils import db
 
 app = Blueprint('users',__name__)
