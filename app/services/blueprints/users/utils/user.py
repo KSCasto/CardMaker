@@ -1,13 +1,14 @@
 def addUserMethod(table,userInfo):
     table.put_item(Item=userInfo)
     return 200
-#KIRAMAKES BIG POOPY
 
 def getUserMethod(table,email):
     res=table.get_item(Key={'email':email})
-    item=res['Item']
+    if 'Item' in res:
+        item=res['Item']
+    else:
+        item={"error":"email not found"}
     return item
-#THANKS FOR CODING BOTTOM
 
 def getAllUsersMethod(table):
     res=table.scan()
@@ -15,7 +16,13 @@ def getAllUsersMethod(table):
     return items
 
 #I love you Kira - from Meep
-def updateUserMethod(table,email,userInfo):
+def updateUserMethod(table,email,attribute,value):
+    table.update_item(Key={'email':email},
+    UpdateExpression='SET :att1 = :val1',
+    ExpressionAttributeValues={
+        ':att1': attribute,
+        ':val1': value
+    })
     return 200
 
 def deleteUserMethod(table,email):
