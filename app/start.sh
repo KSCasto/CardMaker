@@ -1,8 +1,14 @@
 #!/bin/bash
 
 compose_file="docker-compose.yml"
-docker stop app_flask_1
-docker rm app_flask_1
+docker stop flaskAPI
+docker rm flaskAPI
+docker stop nginx
+docker rm nginx
+
+if [[ $* == *--prune* ]]; then
+    docker system prune -a
+fi
 
 # Check if --D flag is provided
 if [[ $* == *--D* ]]; then
