@@ -1,5 +1,4 @@
 from PIL import Image  # install by > python3 -m pip install --upgrade Pillow  # ref. https://pillow.readthedocs.io/en/latest/installation.html#basic-installation
-# from os import listdir, getcwd, getenv
 import zipfile, os
 from dotenv import load_dotenv
 
@@ -46,9 +45,9 @@ def preparePDF(dpi,offset,images):
     return pages
 
 def makePDF(deckName,inputPath,outputPath):
-    # load_dotenv('/app/.env')
-    offset = 1#os.getenv("CARD_MAKER_VERTICAL_OFFSET")
-    dpi = 300#os.getenv("CARD_MAKER_DPI")
+    load_dotenv('/app/.env')
+    offset = int(os.getenv("CARD_MAKER_VERTICAL_OFFSET"))
+    dpi = int(os.getenv("CARD_MAKER_DPI"))
     images = prepareImages(inputPath,dpi)
     pdf = preparePDF(dpi,offset,images)
 
