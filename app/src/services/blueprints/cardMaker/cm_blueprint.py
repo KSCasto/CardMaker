@@ -1,5 +1,5 @@
 from services.blueprints.cardMaker.utils import cm
-from flask import Flask, Blueprint, request, jsonify, current_app, send_file
+from flask import Flask, Blueprint, request, jsonify, current_app, send_file, after_this_request
 import os, zipfile
 
 CardMaker = Blueprint('card-maker',__name__)
@@ -32,7 +32,16 @@ def makeCards():
 
             pdf_path = cm.makePDF(deckName,current_app.config.get('CM_INPUT_FOLDER'),current_app.config.get('CM_OUTPUT_FOLDER'))
 
-            cm.cleanup_files(current_app.config.get('CM_INPUT_FOLDER'),current_app.config.get('CM_OUTPUT_FOLDER'))
+            cm.cleanup_files(current_app.config.get('CM_INPUT_FOLDER'))
+
+            @after_this_request
+            def outputCleanup(response):
+                try:
+                    cm.cleanup_files(current_app.config.get('CM_OUTPUT_FOLDER'))
+                    print(f"Deleted: {pdf_path}")
+                except Exception as e:
+                    print(f"An error occurred while deleting the file: {e}")
+                return response
             return send_file(pdf_path,as_attachment=True)
     except Exception as e:
         return jsonify({'error': f'An error occurred: {str(e)}'}), 500

@@ -60,10 +60,10 @@ def makePDF(deckName,inputPath,outputPath):
     )
     return pdf_path
 
-def cleanup_files(input_file_path,output_file_path):
+def cleanup_files(target_file_path):
     try:
-        for filename in os.listdir(input_file_path):
-            file_path = os.path.join(input_file_path, filename)
+        for filename in os.listdir(target_file_path):
+            file_path = os.path.join(target_file_path, filename)
             if os.path.isfile(file_path) and filename != ".gitkeep":
                 os.remove(file_path)
                 print(f"Deleted: {file_path}")
