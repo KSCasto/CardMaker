@@ -7,17 +7,18 @@ def prepareImages(inputPath,dpi):
     imageNames=os.listdir(inputPath)
     images = []
     for f in imageNames:
-        #This is for when we download an image from misc sites or spoiler pics
-        if "no-crop" in f:
-            images.append(
-                Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.5),int(dpi*3.5)))
-            )
-        #This is the regular way
-        #Because our card images come with oversized borders, we resize them and crop the excess
-        else:
-            images.append(
-                Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.72),int(dpi*3.7))).crop((int(dpi*0.11),int(dpi*0.1),int(dpi*2.61),int(dpi*3.6)))
-            )
+        if f != ".gitkeep":
+            #This is for when we download an image from misc sites or spoiler pics
+            if "no-crop" in f:
+                images.append(
+                    Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.5),int(dpi*3.5)))
+                )
+            #This is the regular way
+            #Because our card images come with oversized borders, we resize them and crop the excess
+            else:
+                images.append(
+                    Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.72),int(dpi*3.7))).crop((int(dpi*0.11),int(dpi*0.1),int(dpi*2.61),int(dpi*3.6)))
+                )
     return images
 
 def preparePDF(dpi,offset,images):
@@ -63,7 +64,7 @@ def cleanup_files(input_file_path,output_file_path):
     try:
         for filename in os.listdir(input_file_path):
             file_path = os.path.join(input_file_path, filename)
-            if os.path.isfile(file_path):
+            if os.path.isfile(file_path) and filename != ".gitkeep":
                 os.remove(file_path)
                 print(f"Deleted: {file_path}")
         print("All files deleted successfully.")
