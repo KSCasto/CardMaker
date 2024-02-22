@@ -10,17 +10,17 @@ def prepareImages(inputPath,dpi):
         #This is for when we download an image from misc sites or spoiler pics
         if "no-crop" in f:
             images.append(
-                Image.open(rf"{inputPath}\{f}").resize((int(dpi*2.5),int(dpi*3.5)))
+                Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.5),int(dpi*3.5)))
             )
         #This is the regular way
         #Because our card images come with oversized borders, we resize them and crop the excess
         else:
             images.append(
-                Image.open(rf"{inputPath}\{f}").resize((int(dpi*2.72),int(dpi*3.7))).crop((int(dpi*0.11),int(dpi*0.1),int(dpi*2.61),int(dpi*3.6)))
+                Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.72),int(dpi*3.7))).crop((int(dpi*0.11),int(dpi*0.1),int(dpi*2.61),int(dpi*3.6)))
             )
     return images
 
-def preparePDF(dpi,thickPaper,images):
+def preparePDF(dpi,offset,images):
     i=0
     pages=[]
     while (len(images)!=0):
@@ -36,7 +36,7 @@ def preparePDF(dpi,thickPaper,images):
                     #Place the image offset by the row/col number and gutters to that point
                     #If thick paper is used, the gutter from the bottom will be used for the top instead
                     #Printing on thick paper normally often cuts off the top, so this is the workaround
-                    newImage.paste(cardImage,(rowGutter*(colNum+1)+colWidth*(colNum),colGutter*(rowNum+1+thickPaper)+rowHeight*(rowNum)))
+                    newImage.paste(cardImage,(rowGutter*(colNum+1)+colWidth*(colNum),colGutter*(rowNum+1+offset)+rowHeight*(rowNum)))
                 except:
                     pass
         pages.append(newImage)
@@ -44,18 +44,40 @@ def preparePDF(dpi,thickPaper,images):
         i+=1
     return pages
 
-def makePDF(deckName,basePath,outputPath):
-    offset = os.getenv("CARD_MAKER_VERTICAL_OFFSET")
-    dpi = os.getenv("CARD_MAKER_DPI")
-    images = prepareImages(outputPath,dpi)
+def makePDF(deckName,inputPath,outputPath):
+    # load_dotenv('/app/.env')
+    offset = 1#os.getenv("CARD_MAKER_VERTICAL_OFFSET")
+    dpi = 300#os.getenv("CARD_MAKER_DPI")
+    images = prepareImages(inputPath,dpi)
     pdf = preparePDF(dpi,offset,images)
 
-    pdf_path = basePath+r"\Output\\"+deckName+".pdf"
+    pdf_path = outputPath+'/'+deckName+".pdf"
     print(pdf_path)
         
     pdf[0].save(
         pdf_path, "PDF" ,resolution=100.0, save_all=True, append_images=pdf[1:]
     )
+    return pdf_path
+
+def cleanup_files(input_file_path,output_file_path):
+    try:
+        for filename in os.listdir(input_file_path):
+            file_path = os.path.join(input_file_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+        print("All files deleted successfully.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def remove_zip(zip_file_path):
+    try:
+        os.remove(zip_file_path)
+        print(f"File '{zip_file_path}' successfully deleted.")
+    except FileNotFoundError:
+        print(f"File '{zip_file_path}' not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def unzip_archive(zip_file_path, extract_to_path):
     try:
