@@ -4,6 +4,7 @@ services:
     container_name: flaskAPI
     volumes:
       - /root/.aws/credentials:/root/.aws/credentials:ro
+      - ./src:/app
     build: .
     ports:
       - "8000:5000"

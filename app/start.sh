@@ -20,5 +20,5 @@ fi
 
 
 # Start Docker container
-docker-compose -f "$compose_file" up -d
+docker-compose -f "$compose_file" up -d --build
 docker ps -a
