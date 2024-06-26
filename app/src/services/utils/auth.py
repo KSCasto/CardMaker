@@ -1,6 +1,6 @@
 import boto3
 import pyotp, os, base64
-from db import connect
+from .db import connect
 
 def authenticate(email,pw):
     dynamodb = connect()

@@ -13,15 +13,15 @@ app.config['CM_OUTPUT_FOLDER'] = '/app/services/blueprints/cardMaker/Output'
 app.register_blueprint(usersApp)
 app.register_blueprint(cmBp)
 
-@app.before_request
-def pre_call():
-    token = request.headers.get('Authorization')
-    email = request.json.get('Email')
-    authenticate(email,token)
+# @app.before_request
+# def pre_call():
+#     token = request.headers.get('Authorization')
+#     email = request.json.get('Email')
+#     authenticate(email,token)
 
 @app.route("/healthcheck")
 def healthCheck():
     return "API reached successfully"
 
 if __name__ == "__main__":
-    app.run(debug=True, host=os.environ("FLASK_RUN_HOST"), port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)
