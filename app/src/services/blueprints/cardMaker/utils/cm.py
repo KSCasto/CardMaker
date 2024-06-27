@@ -7,13 +7,12 @@ def prepareImages(inputPath,dpi):
     images = []
     for f in imageNames:
         if f != ".gitkeep":
-            #This is for when we download an image from misc sites or spoiler pics
+            #This is for when we download an image that doesn't need the edges cropped
             if "no-crop" in f:
                 images.append(
                     Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.5),int(dpi*3.5)))
                 )
             #This is the regular way
-            #Because our card images come with oversized borders, we resize them and crop the excess
             else:
                 images.append(
                     Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.72),int(dpi*3.7))).crop((int(dpi*0.11),int(dpi*0.1),int(dpi*2.61),int(dpi*3.6)))

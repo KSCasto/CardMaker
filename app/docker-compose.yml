@@ -3,7 +3,10 @@ services:
   flask:
     container_name: flaskAPI
     volumes:
-      - /root/.aws/credentials:/root/.aws/credentials:ro
+      # Use root for AWS
+      - /root/.aws:/root/.aws:ro
+      # Use home for VM
+      # - /mnt/c/Users/Kira/.aws:/root/.aws:ro
       - ./src:/app
     build: .
     ports:

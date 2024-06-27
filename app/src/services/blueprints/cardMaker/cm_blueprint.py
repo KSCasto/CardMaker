@@ -1,21 +1,18 @@
 from services.blueprints.cardMaker.utils import cm
 from flask import Flask, Blueprint, request, jsonify, current_app, send_file, after_this_request
-import os, zipfile
+import os, zipfile, logging
 
 CardMaker = Blueprint('card-maker',__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
 
 @CardMaker.route("/makeCards",methods = ['POST'])
 def makeCards():
     try:
         if request.method == 'POST':
-            if 'deck_name' in request.args:
-                deckName = request.args.get('name')
-            else:
-                deckName = "output"
-
+            deckName = request.form.get('deck_name','output')
+            
             if 'file' not in request.files:
-                print(request.files)
-                return jsonify({'error': 'No file sent'}), 400
+                return jsonify(f'No file found for deck: {deckName} : {request.files.get("file")}'), 400
             
             zip_file = request.files['file']
 
@@ -25,12 +22,17 @@ def makeCards():
 
             # Save the zip file to a temporary location
             input_file_path = os.path.join(current_app.config.get('CM_INPUT_FOLDER'), zip_file.filename)
+            
+            logging.info(f'Saving file to: {input_file_path}')
             zip_file.save(input_file_path)
+            logging.info(f'File saved successfully')
 
             cm.unzip_archive(input_file_path,current_app.config.get('CM_INPUT_FOLDER'))
             cm.remove_zip(input_file_path)
 
+            logging.info("Making PDF...")
             pdf_path = cm.makePDF(deckName,current_app.config.get('CM_INPUT_FOLDER'),current_app.config.get('CM_OUTPUT_FOLDER'))
+            logging.info("PDF Created!")
 
             cm.cleanup_files(current_app.config.get('CM_INPUT_FOLDER'))
 
@@ -38,9 +40,9 @@ def makeCards():
             def outputCleanup(response):
                 try:
                     cm.cleanup_files(current_app.config.get('CM_OUTPUT_FOLDER'))
-                    print(f"Deleted: {pdf_path}")
+                    logging.info(f"Deleted: {pdf_path}")
                 except Exception as e:
-                    print(f"An error occurred while deleting the file: {e}")
+                    logging.info(f"An error occurred while deleting the file: {e}")
                 return response
             return send_file(pdf_path,as_attachment=True)
     except Exception as e:
