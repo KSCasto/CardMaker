@@ -4,11 +4,18 @@ from services.blueprints.users.users_blueprint import app as usersApp
 from services.blueprints.cardMaker.cm_blueprint import CardMaker as cmBp
 from services.utils.auth import authenticate
 # from dotenv import dotenv_values as env
+from dotenv import load_dotenv
+
 
 app = Flask(__name__)
 
+# Absolute paths in Docker
 app.config['CM_INPUT_FOLDER'] = '/app/services/blueprints/cardMaker/Input'
 app.config['CM_OUTPUT_FOLDER'] = '/app/services/blueprints/cardMaker/Output'
+
+# Relative paths for local dev
+# app.config['CM_INPUT_FOLDER'] = './services/blueprints/cardMaker/Input'
+# app.config['CM_OUTPUT_FOLDER'] = './services/blueprints/cardMaker/Output'
 
 app.register_blueprint(usersApp)
 app.register_blueprint(cmBp)
@@ -24,4 +31,5 @@ def healthCheck():
     return "API reached successfully"
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    load_dotenv('/app/.env')
+    app.run(debug=True, host=os.environ.get("FLASK_RUN_HOST"), port=5000)
