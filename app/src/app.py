@@ -28,7 +28,7 @@ def pre_call():
     if token and token.startswith("Bearer "):
         token = token[len("Bearer "):]
 
-    logging.info(f"Authenticating with {token},{uid}...")
+    logging.info(f"Authenticating for user {uid}...")
     authenticated=authenticate(uid,token)
     logging.info(f"Authenticated")
 
