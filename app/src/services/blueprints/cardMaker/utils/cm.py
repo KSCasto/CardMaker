@@ -15,6 +15,10 @@ def prepareImages(inputPath,dpi):
                 images.append(
                     Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.5),int(dpi*3.5)))
                 )
+            elif "passport" in f.lower():
+                images.append(
+                    Image.open(rf"{inputPath}/{f}").resize((int(dpi*2),int(dpi*2)))
+                )
             #This is the regular way
             else:
                 images.append(
@@ -38,7 +42,7 @@ def preparePDF(dpi,offset,images):
                     #Place the image offset by the row/col number and gutters to that point
                     #If thick paper is used, the gutter from the bottom will be used for the top instead
                     #Printing on thick paper normally often cuts off the top, so this is the workaround
-                    newImage.paste(cardImage,(rowGutter*(colNum+1)+colWidth*(colNum),colGutter*(rowNum+1+offset)+rowHeight*(rowNum)))
+                    newImage.paste(cardImage,(rowGutter*(colNum+1)+colWidth*(colNum),offset+colGutter*(rowNum+1)+rowHeight*(rowNum)))
                 except:
                     pass
         pages.append(newImage)
