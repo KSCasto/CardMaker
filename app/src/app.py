@@ -29,12 +29,12 @@ def pre_call():
         token = token[len("Bearer "):]
 
     logging.info(f"Authenticating for user {uid}...")
-    # authenticated=authenticate(uid,token)
+    authenticated=authenticate(uid,token)
     logging.info(f"Authenticated")
 
-    # if not authenticated:
-        # logging.warning("Unauthorized access attempt")
-        # return jsonify({'error': 'Unauthorized access'}), 401
+    if not authenticated:
+        logging.warning("Unauthorized access attempt")
+        return jsonify({'error': 'Unauthorized access'}), 401
 
 @app.route("/healthcheck")
 def healthCheck():
