@@ -3,14 +3,14 @@ services:
   flask:
     container_name: flaskAPI
     volumes:
-      - /root/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws:ro
       - ./src:/app
     build: .
     ports:
       - "8000:5000"
     environment:
-      - CM_INPUT=/app/services/blueprints/cardMaker/Input
-      - CM_OUTPUT=/app/services/blueprints/cardMaker/Output
+      - CM_INPUT=./services/blueprints/cardMaker/Input
+      - CM_OUTPUT=./services/blueprints/cardMaker/Output
   
   nginx:
     container_name: nginx

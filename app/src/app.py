@@ -9,13 +9,9 @@ import logging
 
 app = Flask(__name__)
 
-# Absolute paths in Docker
-app.config['CM_INPUT_FOLDER'] = '/app/services/blueprints/cardMaker/Input'
-app.config['CM_OUTPUT_FOLDER'] = '/app/services/blueprints/cardMaker/Output'
-
-# Relative paths for local dev
-# app.config['CM_INPUT_FOLDER'] = './services/blueprints/cardMaker/Input'
-# app.config['CM_OUTPUT_FOLDER'] = './services/blueprints/cardMaker/Output'
+#Paths inside the container for where to store cardMaker files
+app.config['CM_INPUT_FOLDER'] = os.environ.get('CM_INPUT')
+app.config['CM_OUTPUT_FOLDER'] = os.environ.get('CM_OUTPUT')
 
 app.register_blueprint(usersApp)
 app.register_blueprint(cmBp)
