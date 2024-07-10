@@ -3,7 +3,7 @@ services:
   flask:
     container_name: flaskAPI
     volumes:
-      - /root/.aws:/root/.aws:ro
+      - ~/.aws:/root/.aws:ro
       - ./src:/app
     build: .
     ports:
