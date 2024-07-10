@@ -4,7 +4,7 @@ import base64, secrets
 import traceback
 from .db import connect
 
-# Make a password with 32 bits of entropy using letters and digits
+# Make a token with 32 bits of entropy using letters and digits
 def generate_user_token():
     charset = string.ascii_letters + string.digits
     token = ''.join(secrets.choice(charset) for _ in range(32))
@@ -19,10 +19,9 @@ def authenticate(uid,token):
 
     user_authorized=False
     if 'Item' not in res:
-        newToken = generate_user_token()
         authItem = {
             'user_id': uid,
-            'token': newToken
+            'token': None
         }
         #table should still be user_auth at this point
         try:
@@ -36,7 +35,8 @@ def authenticate(uid,token):
             logging.info(traceback.format_exc())
         # userItem={}
     elif 'Item' in res: 
-        if 'token' in res['Item'] and token == res['Item']['token']:
-            user_authorized = True
+        if 'token' in res['Item'] and res['Item']['token']!=None:
+            if token == res['Item']['token']:
+                user_authorized = True
 
     return user_authorized

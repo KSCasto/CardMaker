@@ -8,6 +8,9 @@ services:
     build: .
     ports:
       - "8000:5000"
+    environment:
+      - CM_INPUT=/app/services/blueprints/cardMaker/Input
+      - CM_OUTPUT=/app/services/blueprints/cardMaker/Output
   
   nginx:
     container_name: nginx
