@@ -18,35 +18,40 @@ def addProfile(table, user_id, profile_id, settings):
             **settings
         }
         response = table.put_item(Item=item)
-        return response['ResponseMetadata']['HTTPStatusCode']
+        return {"success": True, "status_code": response['ResponseMetadata']['HTTPStatusCode']}
     except Exception as e:
-        print(f"Error: {e}")
-        return 500
+        logging.error(f"Error in addProfile: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 '''
 ==========================================================
 Any methods to get profiles go in this section
 '''
 def getProfile(table,user_id,profile_id):
-    logging.info(f"user:{user_id}, profile:{profile_id}")
-    res=table.get_item(Key={'user_id':user_id,'profile_id':profile_id})
-    if 'Item' in res:
-        item=res['Item']
-    else:
-        item={"error":"profile not found"}
-    return item
+    try:
+        logging.info(f"user:{user_id}, profile:{profile_id}")
+        res=table.get_item(Key={'user_id':user_id,'profile_id':profile_id})
+        item = res.get('Item', {"error": "profile not found"})
+        return {"success": True, "data": item}
+    except Exception as e:
+        logging.error(f"Error in getProfile: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 def getAllUserProfiles(table,user_id):
-    res=table.query(
-        KeyConditionExpression=Key('user_id').eq(user_id)
-    )
-    items=res['Items']
-    return items
+    try:
+        res = table.query(KeyConditionExpression=Key('user_id').eq(user_id))
+        return {"success": True, "data": res['Items']}
+    except Exception as e:
+        logging.error(f"Error in getAllUserProfiles: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 def getAllProfiles(table):
-    res=table.scan()
-    items=res['Items']
-    return items
+    try:
+        res = table.scan()
+        return {"success": True, "data": res['Items']}
+    except Exception as e:
+        logging.error(f"Error in getAllProfiles: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 '''
 ==========================================================
@@ -69,14 +74,19 @@ def updateProfile(table, user_id, profile_id, newSettings):
             ExpressionAttributeValues=expr_values,
             ExpressionAttributeNames=expr_names
         )
-        return {"status_code": response['ResponseMetadata']['HTTPStatusCode']}
+        return {"success": True, "status_code": response['ResponseMetadata']['HTTPStatusCode']}
     except Exception as e:
-        return {"error": str(e)}
+        logging.error(f"Error in updateProfile: {str(e)}")
+        return {"success": False, "error": str(e)}
 
 '''
 ==========================================================
 Any methods to delete profiles go in this section
 '''
 def deleteProfile(table,user_id,profile_id):
-    table.delete_item(Key={'user_id':user_id,'profile_id':profile_id})
-    return 200
+    try:
+        table.delete_item(Key={'user_id': user_id, 'profile_id': profile_id})
+        return {"success": True, "status_code": 200}
+    except Exception as e:
+        logging.error(f"Error in deleteProfile: {str(e)}")
+        return {"success": False, "error": str(e)}
