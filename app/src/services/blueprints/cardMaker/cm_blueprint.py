@@ -24,14 +24,13 @@ def makeCards():
             # Save the zip file to a temporary location
             input_file_path = os.path.join(input_folder, zip_file.filename)
             
-            logging.info(f'Saving file to: {input_file_path}')
             zip_file.save(input_file_path)
             logging.info(f'File saved successfully')
 
             cm.unzip_archive(input_file_path,input_folder)
             cm.remove_zip(input_file_path)
+            logging.info("Unzipped Successfully")
 
-            logging.info("Making PDF...")
             pdf_path = cm.makePDF(deckName,input_folder,current_app.config.get('CM_OUTPUT_FOLDER'))
             logging.info("PDF Created!")
 
@@ -47,4 +46,4 @@ def makeCards():
                 return response
             return send_file(pdf_path,as_attachment=True)
     except Exception as e:
-        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
+        return jsonify({"success":False,'error': str(e)}), 500

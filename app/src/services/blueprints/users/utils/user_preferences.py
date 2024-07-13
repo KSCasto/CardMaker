@@ -59,9 +59,8 @@ Any methods to update profiles go in this section
 '''
 def updateProfile(table, user_id, profile_id, newSettings):
     try:
-        update_expr = "SET settings = :s, " + ", ".join(f"#{k} = :{k}" for k in newSettings)
+        update_expr = "SET " + ", ".join(f"#{k} = :{k}" for k in newSettings)
         expr_values = {f":{k}": v for k, v in newSettings.items()}
-        expr_values[":s"] = json.dumps(newSettings)
         expr_names = {f"#{k}": k for k in newSettings}
 
         logging.info(f"UpdateExpression: {update_expr}")

@@ -10,9 +10,9 @@ app = Blueprint('users', __name__)
 
 boto3_config = Config(
     max_pool_connections=100,
-    connect_timeout=5,         # Connection timeout in seconds
-    read_timeout=5,            # Read timeout in seconds
-    retries={'max_attempts': 3}  # Number of retry attempts
+    connect_timeout=5,         # Seconds to establish db connection
+    read_timeout=5,            # Seconds to complete a query
+    retries={'max_attempts': 3}
 )
 dynamodb = boto3.resource('dynamodb', config=boto3_config)
 
@@ -38,7 +38,8 @@ def userCRUD():
             user.addUserMethod(table, email)
             return user.getUserMethod(table, email) 
         elif request.method == 'PUT':
-            return user.updateUserMethod(table, request.args.get("user"), request.json)
+            user.updateUserMethod(table, request.args.get("user"), request.json)
+            return user.getUserMethod(table,email)
         elif request.method == 'GET':
             if request.args.get("user"):
                 return user.getUserMethod(table, request.args.get("user"))
@@ -64,7 +65,29 @@ def userPrefsCRUD():
             return user_preferences.getProfile(table, user_id)
         
         elif request.method == 'PUT':
-            return user_preferences.updateProfile(table, request.args.get("user"), request.args.get("profile"), request.json)
+            user_id = request.args.get("user")
+            profile_id = request.args.get("profile")
+            new_settings = request.json
+
+            # Validate user_id
+            try:
+                user_id = int(user_id)
+            except ValueError:
+                return jsonify({"success": False, "error": "Invalid user_id. Must be an integer."}), 400
+
+            # Validate profile_id and new_settings
+            if not profile_id:
+                return jsonify({"success": False, "error": "profile_id is required."}), 400
+            if not new_settings:
+                return jsonify({"success": False, "error": "No settings provided to update."}), 400
+
+            # Update profile
+            update_result = user_preferences.updateProfile(table, user_id, profile_id, new_settings)
+            if not update_result.get("success", False):
+                return jsonify(update_result), 400
+
+            # Get updated profile
+            return user_preferences.getProfile(table, user_id, profile_id)
         
         elif request.method == 'GET':
             if request.args.get("profile"):
