@@ -51,9 +51,11 @@ def preparePDF(dpi,offset,images):
     return pages
 
 def makePDF(deckName,inputPath,outputPath):
-    load_dotenv('/app/.env')
-    offset = int(os.getenv("CARD_MAKER_VERTICAL_OFFSET"))
-    dpi = int(os.getenv("CARD_MAKER_DPI"))
+    # load_dotenv('/app/.env')
+    # offset = int(os.getenv("CARD_MAKER_VERTICAL_OFFSET"))
+    # dpi = int(os.getenv("CARD_MAKER_DPI"))
+    offset = 75
+    dpi = 300
     startTime = time.time()
     images = prepareImages(inputPath,dpi)
     logging.info(f"Images prepared in {(time.time()-startTime) * 1000:.2f} milliseconds")

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 compose_file="docker-compose.yml"
-docker stop flaskAPI
-docker rm flaskAPI
+docker stop card-maker
+docker rm card-maker
 docker stop nginx
 docker rm nginx
 
