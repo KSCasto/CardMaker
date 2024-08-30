@@ -1,7 +1,8 @@
 version: '3.3'
 services:
   flask:
-    container_name: flaskAPI
+    container_name: card-maker
+    image: card-maker:latest
     volumes:
       - ~/.aws:/root/.aws:ro
       - ./src:/app
