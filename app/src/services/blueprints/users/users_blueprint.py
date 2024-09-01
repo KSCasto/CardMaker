@@ -1,35 +1,104 @@
 import sys
-#This import is from the perspective of app.py in the app parent directory
+from flask import Flask, Blueprint, request, jsonify
+import boto3
+from botocore.config import Config
 from services.blueprints.users.utils import user
-
-from flask import Flask,Blueprint,request
+from services.blueprints.users.utils import user_preferences
 from services.utils import db
 
-app = Blueprint('users',__name__)
+app = Blueprint('users', __name__)
 
-@app.route("/user",methods = ['POST','PUT','GET','DELETE'])
-def addUser():
-    dynamodb=db.connect()
-    table=dynamodb.Table('users')
-    res_obj={}
-    if request.method == 'POST':
-        user_data=request.json
-        if ("email" in user_data):
-            email=user_data["email"]
-            print(email)
+boto3_config = Config(
+    max_pool_connections=100,
+    connect_timeout=5,         # Seconds to establish db connection
+    read_timeout=5,            # Seconds to complete a query
+    retries={'max_attempts': 3}
+)
+dynamodb = boto3.resource('dynamodb', config=boto3_config)
+
+
+def handle_response(func):
+    try:
+        result = func()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/user", methods=['POST', 'PUT', 'GET', 'DELETE'])
+def userCRUD():
+    def execute():
+        # dynamodb = db.connect()
+        table = dynamodb.Table('users')
+        
+        if request.method == 'POST':
+            user_data = request.json
+            if "email" not in user_data:
+                return {"success": False, "error": "Missing key 'email' in body"}
+            email = user_data["email"]
             user.addUserMethod(table, email)
-            res_obj=user.getUserMethod(table,email)
-        else:
-            res_obj="Missing key 'email' in body"
-    elif request.method == 'PUT':
-        res_obj=user.updateUserMethod(table, request.args.get("user"),request.json)
-        # res_obj=user.getUserMethod(table,request.args.get("user"))
-    elif request.method == 'GET':
-        if request.args.get("user"):
-            res_obj=user.getUserMethod(table, request.args.get("user"))
-        else:
-            res_obj=user.getAllUsersMethod(table)
-    elif request.method == 'DELETE':
-        user.deleteUserMethod(table,request.args.get("user"))
-        res_obj=f"User {request.args.get('user')} deleted"
-    return res_obj
+            return user.getUserMethod(table, email) 
+        elif request.method == 'PUT':
+            user.updateUserMethod(table, request.args.get("user"), request.json)
+            return user.getUserMethod(table,email)
+        elif request.method == 'GET':
+            if request.args.get("user"):
+                return user.getUserMethod(table, request.args.get("user"))
+            else:
+                return user.getAllUsersMethod(table)
+        elif request.method == 'DELETE':
+            user.deleteUserMethod(table, request.args.get("user"))
+            return {"success": True, "message": f"User {request.args.get('user')} deleted"}
+    return handle_response(execute)
+
+@app.route("/user-prefs", methods=['POST', 'PUT', 'GET', 'DELETE'])
+def userPrefsCRUD():
+    def execute():
+        # dynamodb = db.connect()
+        table = dynamodb.Table('user_preferences')
+        
+        if request.method == 'POST':
+            user_data = request.json
+            if "user_id" not in user_data:
+                return {"success": False, "error": "Missing key 'user_id' in body"}
+            user_id = user_data["user_id"]
+            user_preferences.addProfile(table, user_id)
+            return user_preferences.getProfile(table, user_id)
+        
+        elif request.method == 'PUT':
+            user_id = request.args.get("user")
+            profile_id = request.args.get("profile")
+            new_settings = request.json
+
+            # Validate user_id
+            try:
+                user_id = int(user_id)
+            except ValueError:
+                return jsonify({"success": False, "error": "Invalid user_id. Must be an integer."}), 400
+
+            # Validate profile_id and new_settings
+            if not profile_id:
+                return jsonify({"success": False, "error": "profile_id is required."}), 400
+            if not new_settings:
+                return jsonify({"success": False, "error": "No settings provided to update."}), 400
+
+            # Update profile
+            update_result = user_preferences.updateProfile(table, user_id, profile_id, new_settings)
+            if not update_result.get("success", False):
+                return jsonify(update_result), 400
+
+            # Get updated profile
+            return user_preferences.getProfile(table, user_id, profile_id)
+        
+        elif request.method == 'GET':
+            if request.args.get("profile"):
+                return user_preferences.getProfile(table, request.args.get("user"), request.args.get("profile"))
+            elif request.args.get("user-profiles"):
+                return user_preferences.getAllUserProfiles(table, request.args.get("user-profiles"))
+            elif request.args.get("all-profiles"):
+                return user_preferences.getAllProfiles(table)
+        
+        elif request.method == 'DELETE':
+            user_preferences.deleteProfile(table, request.args.get("user"))
+            return {"success": True, "message": f"User {request.args.get('user')} deleted"}
+    
+    return handle_response(execute)
