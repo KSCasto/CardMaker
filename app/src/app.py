@@ -40,4 +40,4 @@ def healthCheck():
 
 if __name__ == "__main__":
     load_dotenv('/app/.env')
-    app.run(host=os.environ.get("FLASK_RUN_HOST"), port=5000, debug=True)
+    app.run(host=os.environ.get("FLASK_HOST"), port=os.environ.get("FLASK_PORT"))
