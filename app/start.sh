@@ -11,9 +11,10 @@ if [[ $* == *--prune* ]]; then
 fi
 
 # Check if --D flag is provided
-if [[ $* == *--D* ]]; then
-    compose_file="docker-compose-dev.yml"
+if [[ $* == *--K* ]]; then
+    compose_file="docker-compose-kubernetes.yml"
 fi
+
 if [[ $* == *--L* ]]; then
     compose_file="docker-compose-local.yml"
 fi
