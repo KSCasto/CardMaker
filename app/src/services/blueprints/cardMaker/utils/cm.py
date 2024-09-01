@@ -1,30 +1,36 @@
 from PIL import Image  # install by > python3 -m pip install --upgrade Pillow  # ref. https://pillow.readthedocs.io/en/latest/installation.html#basic-installation
 import zipfile, os, time, logging
 from dotenv import load_dotenv
+import multiprocessing as mp
+from functools import partial
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
 
 
-def prepareImages(inputPath,dpi):
-    imageNames=os.listdir(inputPath)
-    images = []
-    for f in imageNames:
-        if f != ".gitkeep":
-            #This is for when we download an image that doesn't need the edges cropped
-            if "no-crop" in f:
-                images.append(
-                    Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.5),int(dpi*3.5)))
-                )
-            elif "passport" in f.lower():
-                images.append(
-                    Image.open(rf"{inputPath}/{f}").resize((int(dpi*2),int(dpi*2)))
-                )
-            #This is the regular way
-            else:
-                images.append(
-                    Image.open(rf"{inputPath}/{f}").resize((int(dpi*2.72),int(dpi*3.7))).crop((int(dpi*0.11),int(dpi*0.1),int(dpi*2.61),int(dpi*3.6)))
-                )
-    return images
+def process_image(f, inputPath, dpi):
+    if f == ".gitkeep":
+        return None
+    #This is for when we download an image that doesn't need the edges cropped
+    if "no-crop" in f:
+        return Image.open(f"{inputPath}/{f}").resize((int(dpi*2.5), int(dpi*3.5)))
+    elif "passport" in f.lower():
+        return Image.open(f"{inputPath}/{f}").resize((int(dpi*2), int(dpi*2)))
+    #This is the regular way
+    else:
+        img = Image.open(f"{inputPath}/{f}").resize((int(dpi*2.72), int(dpi*3.7)))
+        return img.crop((int(dpi*0.11), int(dpi*0.1), int(dpi*2.61), int(dpi*3.6)))
+
+def prepareImages(inputPath, dpi):
+    imageNames = os.listdir(inputPath)
+    
+    # Create a multiprocessing pool
+    with mp.Pool() as pool:
+        # Use partial to fix inputPath and dpi arguments
+        # Map process_image function to all image names in parallel
+        images = pool.map(partial(process_image, inputPath=inputPath, dpi=dpi), imageNames)
+    
+    # Filter out None results (from .gitkeep files)
+    return [img for img in images if img is not None]
 
 def preparePDF(dpi,offset,images):
     i=0
